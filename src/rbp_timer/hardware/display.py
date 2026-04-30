@@ -30,6 +30,11 @@ class Display:
             self._font_medium = ImageFont.load_default()
             self._font_small = ImageFont.load_default()
 
+        # Initialize LCD
+        if lcd is not None:
+            lcd.clear()
+            lcd.show()
+
     def clear(self) -> None:
         self._draw.rectangle((0, 0, WIDTH - 1, HEIGHT - 1), fill=0)
 

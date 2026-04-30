@@ -15,6 +15,9 @@ except ImportError:
 class BlinkStickController:
     """Controls a BlinkStick USB LED with steady colors and animations."""
 
+    # BlinkStick Square has 8 WS2812 LEDs
+    _NUM_LEDS = 8
+
     def __init__(self):
         self._stick = None
         self._animation_thread: Optional[threading.Thread] = None
@@ -23,6 +26,11 @@ class BlinkStickController:
 
         if blinkstick:
             self._stick = blinkstick.find_first()
+            if self._stick:
+                try:
+                    self._stick.set_mode(2)  # WS2812 mode
+                except Exception:
+                    pass
 
     @property
     def available(self) -> bool:
@@ -64,7 +72,8 @@ class BlinkStickController:
     def _set_hw_color(self, r: int, g: int, b: int) -> None:
         if self._stick:
             try:
-                self._stick.set_color(red=r, green=g, blue=b)
+                for i in range(self._NUM_LEDS):
+                    self._stick.set_color(channel=0, index=i, red=r, green=g, blue=b)
             except Exception:
                 pass
 
