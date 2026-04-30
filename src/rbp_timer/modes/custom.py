@@ -81,6 +81,21 @@ class CustomMode:
         self._apply_phase()
         self.timer.start()
 
+    def skip(self) -> None:
+        """Skip the current phase and advance to the next."""
+        self.timer.stop()
+        if self._phase == CustomPhase.WORK:
+            self._current_cycle += 1
+            if self._current_cycle >= self._total_cycles:
+                if self.on_all_done:
+                    self.on_all_done()
+                return
+            self._phase = CustomPhase.BREAK
+        else:
+            self._phase = CustomPhase.WORK
+        self._apply_phase()
+        self.timer.start()
+
     def stop(self) -> None:
         """Stop and reset."""
         self.timer.stop()

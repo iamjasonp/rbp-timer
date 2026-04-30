@@ -123,6 +123,13 @@ class App:
         r, g, b = self.backlight.current_color
         self.blinkstick.set_color(r, g, b)
         self._bind_timer_buttons()
+        self.buttons.register(PLUS, self._skip_pomodoro_phase)
+
+    def _skip_pomodoro_phase(self) -> None:
+        self.pomodoro.skip()
+        self._update_pomodoro_visuals()
+        self._bind_timer_buttons()
+        self.buttons.register(PLUS, self._skip_pomodoro_phase)
 
     def _on_pomodoro_phase(self, phase: PomodoroPhase, cycle: int) -> None:
         self._update_pomodoro_visuals()
@@ -239,6 +246,16 @@ class App:
         r, g, b = self.backlight.current_color
         self.blinkstick.set_color(r, g, b)
         self._bind_timer_buttons()
+        self.buttons.register(PLUS, self._skip_custom_phase)
+
+    def _skip_custom_phase(self) -> None:
+        self.custom.skip()
+        # If skip triggered on_all_done, don't rebind timer buttons
+        if self.custom.current_cycle >= self.custom.total_cycles and self.custom.phase == CustomPhase.WORK:
+            return
+        self._update_custom_visuals()
+        self._bind_timer_buttons()
+        self.buttons.register(PLUS, self._skip_custom_phase)
 
     def _on_custom_phase(self, phase: CustomPhase, cycle: int, total: int) -> None:
         self._update_custom_visuals()
