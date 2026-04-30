@@ -144,7 +144,7 @@ class Buttons:
                         with self._lock:
                             handler = self._handlers.get(bit)
                         if handler:
-                            handler()
+                            threading.Thread(target=handler, daemon=True).start()
 
             prev_status = status
             self._stop_event.wait(_POLL_INTERVAL)

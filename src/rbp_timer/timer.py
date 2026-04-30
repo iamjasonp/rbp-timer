@@ -56,6 +56,13 @@ class Timer:
     def elapsed(self) -> float:
         return self._duration - self._remaining
 
+    def adjust_remaining(self, delta: float) -> None:
+        """Add or subtract time from the running/paused timer."""
+        with self._lock:
+            if self._state in (TimerState.RUNNING, TimerState.PAUSED):
+                self._remaining = max(0.0, self._remaining + delta)
+                self._duration = max(0.0, self._duration + delta)
+
     def _set_state(self, new_state: TimerState) -> None:
         if new_state != self._state:
             self._state = new_state
