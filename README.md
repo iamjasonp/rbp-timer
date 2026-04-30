@@ -1,4 +1,4 @@
-# RBP Timer — Raspberry Pi Productivity Timer
+# Jasondoro Timer — Raspberry Pi Productivity Timer
 
 A headless productivity timer for Raspberry Pi 4 with **Pimoroni GFX HAT** and **BlinkStick** USB LED.
 
