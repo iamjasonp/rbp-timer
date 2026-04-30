@@ -1,42 +1,48 @@
-# Raspberry Pi Productivity Timer
+# Jasondoro Timer — Raspberry Pi Productivity Timer
 
 ## Problem
 Build a headless productivity timer for a Raspberry Pi 4 equipped with a **Pimoroni GFX HAT** (128×64 LCD, RGB backlight, 6 capacitive touch buttons) and a **BlinkStick** USB LED. The timer runs on boot and is controlled entirely via the GFX HAT buttons.
 
 ## Timer Modes
 1. **Pomodoro** — 25 min work / 5 min short break / 15 min long break (every 4 cycles)
-2. **Countdown** — user-configurable one-shot countdown timer
-3. **Custom Intervals** — user-defined work/break durations with configurable cycle count
+2. **Custom Pomodoro** — user-defined work/break durations with configurable cycle count
+3. **Countdown Timer** — user-configurable one-shot countdown timer
 
 ## Hardware Mapping
 
 ### GFX HAT LCD (128×64 monochrome)
-- Main menu: mode selection (Pomodoro / Countdown / Custom)
-- Timer screen: large countdown digits, mode label, cycle count (Pomodoro)
+- Main menu: mode selection (Pomodoro / Custom Pomodoro / Countdown Timer)
+- Timer screen: large countdown digits, mode label, cycle count, progress bar (Pomodoro modes)
 - Settings screens: adjust durations with up/down buttons
 
 ### GFX HAT Backlight (6 RGB zones)
+Brightness is set to 50% of full values during timer states; menu brightness is full.
+
 | State       | Color  |
 |-------------|--------|
-| Work        | Green  |
+| Work        | Red    |
 | Break       | Blue   |
-| Paused      | Yellow |
-| Timer done  | Red    |
-| Menu/idle   | White  |
+| Paused      | Amber  |
+| Timer done  | Green  |
+| Menu/idle   | Gray   |
 
 ### GFX HAT Buttons (6 capacitive touch pads, left to right)
-| Button   | Index | Menu Context     | Timer Context     |
-|----------|-------|-----------------|-------------------|
-| Up ↑     | 0     | Navigate up      | —                 |
-| Down ↓   | 1     | Navigate down    | —                 |
-| Back ←   | 2     | Back / cancel    | Back to menu      |
-| Minus −  | 3     | —                | —                 |
-| Select ○ | 4     | Select / enter   | Pause / Resume    |
-| Plus +   | 5     | Select / enter   | Stop / Reset      |
+Button LEDs automatically reflect mapping: lit when a handler is registered, dark when unmapped.
+Button handlers are dispatched in separate threads to prevent blocking the I2C poll loop.
 
-### BlinkStick
+| Button   | Index | Menu Context     | Timer Context (Pomodoro) | Timer Context (Countdown) |
+|----------|-------|-----------------|--------------------------|---------------------------|
+| Up ↑     | 0     | Navigate up      | —                        | —                         |
+| Down ↓   | 1     | Navigate down    | —                        | —                         |
+| Back ←   | 2     | —                | Stop & menu              | Stop & menu               |
+| Minus −  | 3     | —                | —                        | −1 minute                 |
+| Select ○ | 4     | Select / enter   | Pause / Resume           | Pause / Resume            |
+| Plus +   | 5     | —                | Skip phase               | +1 minute                 |
+
+### BlinkStick Square
 - Steady color mirrors backlight state during active timer
-- Pulse/flash animation on timer completion and break-over alerts
+- Brightness capped at 25% via hardware scalar in BlinkStickController
+- Pulse/flash animation on timer completion and phase transitions
 - Off when idle/in menu
 
 ## Architecture
@@ -60,11 +66,16 @@ rbp-timer/
 │       │   ├── display.py    # GFX HAT LCD rendering (text, digits, menus)
 │       │   ├── backlight.py  # GFX HAT backlight color management
 │       │   ├── buttons.py    # GFX HAT capacitive touch input handling
-│       │   └── blinkstick.py # BlinkStick LED control & animations
+│       │   └── blinkstick_ctrl.py # BlinkStick Square LED control & animations
 │       └── ui/
 │           ├── __init__.py
 │           ├── menu.py       # Main menu & navigation state machine
 │           └── screens.py    # Timer display, settings screens
+├── diagnostics/
+│   ├── diag_lcd.py          # LCD diagnostic
+│   ├── diag_touch.py        # Touch diagnostic
+│   ├── diag_blinkstick.py   # BlinkStick diagnostic
+│   └── diag_buttons_map.py  # Button mapping diagnostic
 ├── systemd/
 │   └── rbp-timer.service     # systemd unit for auto-start on boot
 └── tests/
@@ -160,6 +171,7 @@ The BlinkStick Square has 8 WS2812 addressable LEDs and reports as **variant 4**
 4. Enable and start: `sudo systemctl enable --now rbp-timer`
 
 ### Diagnostic Scripts
+Located in the `diagnostics/` directory:
 - `diag_lcd.py` — Tests LCD by drawing a border rectangle
 - `diag_touch.py` — Tests CAP1166 touch via raw I2C register reads
 - `diag_blinkstick.py` — Tests BlinkStick Square LED addressing
