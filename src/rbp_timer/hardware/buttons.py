@@ -62,11 +62,22 @@ class Buttons:
         """Register a callback for a button press."""
         with self._lock:
             self._handlers[button] = handler
+        self._update_leds()
 
     def clear_handlers(self) -> None:
         """Remove all button handlers."""
         with self._lock:
             self._handlers.clear()
+        self._update_leds()
+
+    def _update_leds(self) -> None:
+        """Turn on LEDs for mapped buttons, off for unmapped ones."""
+        if _touch_leds is None or not self._enabled:
+            return
+        with self._lock:
+            mapped = set(self._handlers.keys())
+        for btn in range(6):
+            _touch_leds.set_led(btn, 1 if btn in mapped else 0)
 
     def enable(self) -> None:
         """Start listening for button events via I2C polling."""
@@ -82,10 +93,10 @@ class Buttons:
         except OSError:
             pass
 
-        # Turn on button LEDs
+        # LEDs will be updated when handlers are registered
         if _touch_leds is not None:
             for btn in range(6):
-                _touch_leds.set_led(btn, 1)
+                _touch_leds.set_led(btn, 0)
 
         self._stop_event.clear()
         self._poll_thread = threading.Thread(
