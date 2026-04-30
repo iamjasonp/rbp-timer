@@ -1,0 +1,16 @@
+[Unit]
+Description=RBP Productivity Timer
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 -m rbp_timer.main
+WorkingDirectory=/opt/rbp-timer
+Restart=on-failure
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+User=pi
+
+[Install]
+WantedBy=multi-user.target
