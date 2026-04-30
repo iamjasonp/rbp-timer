@@ -114,18 +114,20 @@ class Buttons:
                 time.sleep(_POLL_INTERVAL)
                 continue
 
-            # Detect new presses (bits that went from 0 to 1)
-            new_presses = status & ~prev_status
-            if new_presses:
-                # Clear the INT flag so sensor keeps updating
-                try:
-                    main = _bus.read_byte_data(_CAP1166_ADDR, _REG_MAIN_CONTROL)
+            # Always clear the INT flag so the sensor keeps updating.
+            # The status register latches and freezes while INT is set.
+            try:
+                main = _bus.read_byte_data(_CAP1166_ADDR, _REG_MAIN_CONTROL)
+                if main & 0x01:
                     _bus.write_byte_data(
                         _CAP1166_ADDR, _REG_MAIN_CONTROL, main & ~0x01
                     )
-                except OSError:
-                    pass
+            except OSError:
+                pass
 
+            # Detect new presses (bits that went from 0 to 1)
+            new_presses = status & ~prev_status
+            if new_presses:
                 for bit in range(6):
                     if new_presses & (1 << bit):
                         with self._lock:
