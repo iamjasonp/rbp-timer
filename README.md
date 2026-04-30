@@ -12,13 +12,15 @@ A headless productivity timer for Raspberry Pi 4 with **Pimoroni GFX HAT** and *
 
 ### Hardware Feedback
 
-| State   | GFX HAT Backlight | BlinkStick          |
-|---------|--------------------|--------------------|
-| Work    | Red (50%)          | Steady red (25%)   |
-| Break   | Blue (50%)         | Steady blue (25%)  |
-| Paused  | Amber (50%)        | Steady amber (25%) |
-| Done    | Green (50%)        | Flash green (25%)  |
-| Menu    | Gray (full)        | Off                |
+| State   | GFX HAT Backlight      | BlinkStick               |
+|---------|------------------------|--------------------------|
+| Work    | Red (50%)              | Steady red (25%)         |
+| Break   | Blue (50%)             | Steady deep blue (25%)   |
+| Paused  | Amber (50%)            | Steady amber (25%)       |
+| Done    | Green (50%)            | Flash green (25%)        |
+| Menu    | Gray (full)            | Off                      |
+
+Backlight and BlinkStick use independent color palettes (`BACKLIGHT_COLORS` and `BLINKSTICK_COLORS`) and can be tuned separately.
 
 ## Hardware Requirements
 
