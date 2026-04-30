@@ -24,15 +24,15 @@ Build a headless productivity timer for a Raspberry Pi 4 equipped with a **Pimor
 | Timer done  | Red    |
 | Menu/idle   | White  |
 
-### GFX HAT Buttons (6 capacitive touch pads)
-| Button | Menu Context     | Timer Context     |
-|--------|-----------------|-------------------|
-| Up     | Navigate up      | —                 |
-| Down   | Navigate down    | —                 |
-| Left   | Back / cancel    | Back to menu      |
-| Right  | Select / enter   | —                 |
-| A      | —                | Start / Pause     |
-| B      | —                | Stop / Reset      |
+### GFX HAT Buttons (6 capacitive touch pads, left to right)
+| Button   | Index | Menu Context     | Timer Context     |
+|----------|-------|-----------------|-------------------|
+| Up ↑     | 0     | Navigate up      | —                 |
+| Down ↓   | 1     | Navigate down    | —                 |
+| Back ←   | 2     | Back / cancel    | Back to menu      |
+| Minus −  | 3     | —                | —                 |
+| Select ○ | 4     | Select / enter   | Pause / Resume    |
+| Plus +   | 5     | Select / enter   | Stop / Reset      |
 
 ### BlinkStick
 - Steady color mirrors backlight state during active timer

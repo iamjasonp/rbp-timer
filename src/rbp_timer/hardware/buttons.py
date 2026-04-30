@@ -35,15 +35,15 @@ try:
 except ImportError:
     _touch_leds = None
 
-# Button index constants matching GFX HAT layout
+# Button index constants matching GFX HAT physical labels
 UP = 0
 DOWN = 1
-LEFT = 2
-RIGHT = 3
-A = 4
-B = 5
+BACK = 2
+MINUS = 3
+SELECT = 4
+PLUS = 5
 
-BUTTON_NAMES = {UP: "up", DOWN: "down", LEFT: "left", RIGHT: "right", A: "a", B: "b"}
+BUTTON_NAMES = {UP: "up", DOWN: "down", BACK: "back", MINUS: "minus", SELECT: "select", PLUS: "plus"}
 
 _POLL_INTERVAL = 0.05  # 50ms polling
 
