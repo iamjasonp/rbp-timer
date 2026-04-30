@@ -11,6 +11,9 @@ dependencies = [
     "gfxhat>=0.0.1",
     "blinkstick>=1.2.0",
     "Pillow>=9.0.0",
+    "spidev>=3.0",
+    "smbus>=1.1",
+    "pyusb>=1.0.0",
 ]
 
 [project.optional-dependencies]
