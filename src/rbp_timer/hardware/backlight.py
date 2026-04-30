@@ -18,6 +18,9 @@ BACKLIGHT_COLORS = {
     "paused": (128, 100, 0),
     "done": (0, 128, 0),
     "menu": (80, 80, 80),
+    "available": (0, 128, 0),
+    "away": (128, 100, 0),
+    "busy": (128, 0, 0),
 }
 
 

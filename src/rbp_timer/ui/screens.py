@@ -5,6 +5,7 @@ from __future__ import annotations
 from rbp_timer.hardware.display import Display
 from rbp_timer.modes.pomodoro import PomodoroPhase
 from rbp_timer.modes.custom import CustomPhase
+from rbp_timer.modes.status_light import StatusLightState
 from rbp_timer.timer import TimerState
 
 
@@ -51,3 +52,41 @@ def render_custom_settings(display: Display, field: str, value: int) -> None:
         "cycles": "Cycles",
     }
     display.draw_setting(labels.get(field, field), str(value), "UP/DOWN to adjust")
+
+
+def _format_elapsed(seconds: float) -> str:
+    """Format elapsed seconds as MM:SS or H:MM:SS."""
+    total = int(seconds)
+    h, remainder = divmod(total, 3600)
+    m, s = divmod(remainder, 60)
+    if h > 0:
+        return f"{h}:{m:02d}:{s:02d}"
+    return f"{m:02d}:{s:02d}"
+
+
+def render_status_light(display: Display, state: StatusLightState, state_elapsed: float, total_elapsed: float) -> None:
+    state_labels = {
+        StatusLightState.AVAILABLE: "AVAILABLE",
+        StatusLightState.AWAY: "AWAY",
+        StatusLightState.BUSY: "BUSY",
+    }
+    label = state_labels.get(state, "")
+    time_str = _format_elapsed(state_elapsed)
+    display.clear()
+    display.draw_centered_text(2, label, "small")
+    display.draw_centered_text(16, time_str, "large")
+    display.show()
+
+
+def render_status_summary(display: Display, summary: dict) -> None:
+    display.clear()
+    display.draw_centered_text(0, "TIMER PAUSED", "small")
+    avail = _format_elapsed(summary.get("available", 0))
+    away = _format_elapsed(summary.get("away", 0))
+    busy = _format_elapsed(summary.get("busy", 0))
+    total = _format_elapsed(summary.get("total", 0))
+    display.draw_text(2, 14, f"Avail: {avail}", "small")
+    display.draw_text(2, 26, f"Away:  {away}", "small")
+    display.draw_text(2, 38, f"Busy:  {busy}", "small")
+    display.draw_text(2, 50, f"Total: {total}", "small")
+    display.show()

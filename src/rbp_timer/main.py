@@ -11,6 +11,7 @@ from rbp_timer.timer import Timer, TimerState
 from rbp_timer.modes.pomodoro import PomodoroMode, PomodoroPhase
 from rbp_timer.modes.countdown import CountdownMode
 from rbp_timer.modes.custom import CustomMode, CustomPhase
+from rbp_timer.modes.status_light import StatusLightMode, StatusLightState
 from rbp_timer.hardware.display import Display
 from rbp_timer.hardware.backlight import Backlight
 from rbp_timer.hardware.buttons import Buttons, UP, DOWN, BACK, MINUS, SELECT, PLUS
@@ -34,9 +35,12 @@ class App:
         self.pomodoro = PomodoroMode(self.timer)
         self.countdown = CountdownMode(self.timer)
         self.custom = CustomMode(self.timer)
+        self.status_light = StatusLightMode()
 
         self._active_mode: Optional[str] = None
         self._shutdown_event = threading.Event()
+        self._status_light_stop = threading.Event()
+        self._status_light_thread: Optional[threading.Thread] = None
 
         # Custom settings navigation
         self._custom_setting_fields = ["work", "break", "cycles"]
@@ -71,6 +75,7 @@ class App:
         self._shutdown_event.set()
 
     def _cleanup(self) -> None:
+        self._stop_status_light_tick()
         self.timer.stop()
         self.buttons.disable()
         self.backlight.off()
@@ -81,6 +86,9 @@ class App:
     # ── Menu ──
 
     def _show_main_menu(self) -> None:
+        self._stop_status_light_tick()
+        if self._active_mode == "status_light":
+            self.status_light.reset()
         self._active_mode = None
         self.timer.stop()
         self.backlight.set_state("menu")
@@ -108,6 +116,8 @@ class App:
             self._show_countdown_settings()
         elif mode == "custom":
             self._show_custom_settings()
+        elif mode == "status_light":
+            self._start_status_light()
 
     # ── Pomodoro ──
 
@@ -275,6 +285,70 @@ class App:
         self.buttons.clear_handlers()
         for btn in range(6):
             self.buttons.register(btn, self._show_main_menu)
+
+    # ── Status Light ──
+
+    def _start_status_light(self) -> None:
+        self.status_light.start()
+        self._set_status_light_colors("available")
+        self._bind_status_light_buttons()
+        self._start_status_light_tick()
+
+    def _set_status_light_colors(self, state_key: str) -> None:
+        self.backlight.set_state(state_key)
+        self.blinkstick.set_color(*BLINKSTICK_COLORS[state_key])
+
+    def _switch_status_light(self, state: StatusLightState) -> None:
+        self.status_light.set_state(state)
+        self._set_status_light_colors(state.value)
+
+    def _bind_status_light_buttons(self) -> None:
+        self.buttons.clear_handlers()
+        self.buttons.register(MINUS, lambda: self._switch_status_light(StatusLightState.AWAY))
+        self.buttons.register(SELECT, lambda: self._switch_status_light(StatusLightState.AVAILABLE))
+        self.buttons.register(PLUS, lambda: self._switch_status_light(StatusLightState.BUSY))
+        self.buttons.register(BACK, self._show_status_summary)
+
+    def _start_status_light_tick(self) -> None:
+        self._status_light_stop.clear()
+        self._status_light_thread = threading.Thread(
+            target=self._status_light_tick_loop, daemon=True
+        )
+        self._status_light_thread.start()
+
+    def _stop_status_light_tick(self) -> None:
+        self._status_light_stop.set()
+        if self._status_light_thread and self._status_light_thread.is_alive():
+            self._status_light_thread.join(timeout=2.0)
+        self._status_light_thread = None
+
+    def _status_light_tick_loop(self) -> None:
+        while not self._status_light_stop.is_set():
+            if self.status_light.running:
+                screens.render_status_light(
+                    self.display,
+                    self.status_light.state,
+                    self.status_light.current_state_elapsed(),
+                    self.status_light.total_elapsed(),
+                )
+            self._status_light_stop.wait(1.0)
+
+    def _show_status_summary(self) -> None:
+        self._stop_status_light_tick()
+        summary = self.status_light.get_summary()
+        screens.render_status_summary(self.display, summary)
+        self.blinkstick.set_color(*BLINKSTICK_COLORS["break"])
+        self.buttons.clear_handlers()
+        self.buttons.register(MINUS, lambda: self._resume_status_light(StatusLightState.AWAY))
+        self.buttons.register(SELECT, lambda: self._resume_status_light(StatusLightState.AVAILABLE))
+        self.buttons.register(PLUS, lambda: self._resume_status_light(StatusLightState.BUSY))
+        self.buttons.register(BACK, self._show_main_menu)
+
+    def _resume_status_light(self, state: StatusLightState) -> None:
+        self.status_light.set_state(state)
+        self._set_status_light_colors(state.value)
+        self._bind_status_light_buttons()
+        self._start_status_light_tick()
 
     # ── Common Timer Controls ──
 

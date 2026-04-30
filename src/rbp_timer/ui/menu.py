@@ -15,8 +15,8 @@ class MenuState(enum.Enum):
 class Menu:
     """Navigation state machine for the timer UI."""
 
-    MAIN_ITEMS = ["Pomodoro", "Custom Pomodoro", "Countdown Timer"]
-    _MODE_KEYS = ["pomodoro", "custom", "countdown"]
+    MAIN_ITEMS = ["Pomodoro", "Custom Pomodoro", "Countdown Timer", "Status Light"]
+    _MODE_KEYS = ["pomodoro", "custom", "countdown", "status_light"]
 
     def __init__(self):
         self._state = MenuState.MAIN
