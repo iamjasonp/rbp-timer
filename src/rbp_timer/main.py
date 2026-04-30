@@ -299,16 +299,17 @@ class App:
             self.custom._on_timer_done()
 
     def _on_tick(self, remaining: float) -> None:
+        duration = self.timer.duration
         if self._active_mode == "pomodoro":
             screens.render_pomodoro(
-                self.display, remaining, self.pomodoro.phase, self.pomodoro.completed_cycles
+                self.display, remaining, self.pomodoro.phase, self.pomodoro.completed_cycles, duration
             )
         elif self._active_mode == "countdown":
             screens.render_countdown(self.display, remaining, self.timer.state)
         elif self._active_mode == "custom":
             screens.render_custom(
                 self.display, remaining, self.custom.phase,
-                self.custom.current_cycle, self.custom.total_cycles
+                self.custom.current_cycle, self.custom.total_cycles, duration
             )
 
     def _on_timer_state_change(self, state: TimerState) -> None:
