@@ -9,7 +9,7 @@ from rbp_timer.timer import TimerState
 
 
 def render_main_menu(display: Display, items: list[str], selected: int) -> None:
-    display.draw_menu("RBP Timer", items, selected)
+    display.draw_menu("Jasondoro Timer", items, selected)
 
 
 def render_pomodoro(display: Display, remaining: float, phase: PomodoroPhase, cycle: int) -> None:

@@ -15,7 +15,8 @@ class MenuState(enum.Enum):
 class Menu:
     """Navigation state machine for the timer UI."""
 
-    MAIN_ITEMS = ["Pomodoro", "Countdown", "Custom"]
+    MAIN_ITEMS = ["Pomodoro", "Custom Pomodoro", "Countdown Timer"]
+    _MODE_KEYS = ["pomodoro", "custom", "countdown"]
 
     def __init__(self):
         self._state = MenuState.MAIN
@@ -36,7 +37,7 @@ class Menu:
 
     @property
     def selected_mode(self) -> str:
-        return self.MAIN_ITEMS[self._selected_index].lower()
+        return self._MODE_KEYS[self._selected_index]
 
     def navigate_up(self) -> None:
         if self._state == MenuState.MAIN:

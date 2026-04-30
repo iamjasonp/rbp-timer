@@ -1,5 +1,5 @@
 [Unit]
-Description=RBP Productivity Timer
+Description=Jasondoro Productivity Timer
 After=multi-user.target
 
 [Service]
