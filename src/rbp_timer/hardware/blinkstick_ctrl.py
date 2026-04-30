@@ -17,6 +17,8 @@ class BlinkStickController:
 
     # BlinkStick Square has 8 WS2812 LEDs
     _NUM_LEDS = 8
+    # Global brightness scalar (0.0–1.0) applied to all color output
+    _BRIGHTNESS = 0.25
 
     def __init__(self):
         self._stick = None
@@ -72,9 +74,10 @@ class BlinkStickController:
 
     def _set_hw_color(self, r: int, g: int, b: int) -> None:
         if self._stick:
+            br, bg, bb = (int(r * self._BRIGHTNESS), int(g * self._BRIGHTNESS), int(b * self._BRIGHTNESS))
             try:
                 for i in range(self._NUM_LEDS):
-                    self._stick.set_color(channel=0, index=i, red=r, green=g, blue=b)
+                    self._stick.set_color(channel=0, index=i, red=br, green=bg, blue=bb)
             except Exception:
                 pass
 

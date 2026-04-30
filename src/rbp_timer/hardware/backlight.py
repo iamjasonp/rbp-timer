@@ -11,11 +11,12 @@ except ImportError:
 
 
 # State-to-color mapping (R, G, B)
+# Timer states are at 50% brightness; menu is full brightness
 COLORS = {
-    "work": (0, 255, 0),
-    "break": (0, 100, 255),
-    "paused": (255, 200, 0),
-    "done": (255, 0, 0),
+    "work": (0, 128, 0),
+    "break": (0, 50, 128),
+    "paused": (128, 100, 0),
+    "done": (128, 0, 0),
     "menu": (80, 80, 80),
 }
 

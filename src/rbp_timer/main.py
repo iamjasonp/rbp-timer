@@ -169,7 +169,7 @@ class App:
 
     def _on_countdown_done(self) -> None:
         self.backlight.set_state("done")
-        self.blinkstick.flash(255, 0, 0, count=5)
+        self.blinkstick.flash(128, 0, 0, count=5)
         self.display.draw_message("Time's Up!", "Press any button")
         self.buttons.clear_handlers()
         for btn in range(6):
@@ -253,7 +253,7 @@ class App:
 
     def _on_custom_all_done(self) -> None:
         self.backlight.set_state("done")
-        self.blinkstick.flash(255, 0, 0, count=5)
+        self.blinkstick.flash(128, 0, 0, count=5)
         self.display.draw_message("All Done!", f"{self.custom.total_cycles} cycles complete")
         self.buttons.clear_handlers()
         for btn in range(6):
@@ -273,7 +273,7 @@ class App:
         if self.timer.state == TimerState.RUNNING:
             self.timer.pause()
             self.backlight.set_state("paused")
-            self.blinkstick.set_color(255, 200, 0)
+            self.blinkstick.set_color(128, 100, 0)
         elif self.timer.state == TimerState.PAUSED:
             self.timer.resume()
             # Restore mode-appropriate color
