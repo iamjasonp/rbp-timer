@@ -56,9 +56,10 @@ class BlinkStickController:
         self._animation_thread.start()
 
     def flash(self, r: int, g: int, b: int, count: int = 5, on_time: float = 0.15, off_time: float = 0.15) -> None:
-        """Start a flashing animation in a background thread."""
+        """Start a flashing animation then hold steady at the given color."""
         self._stop_animation()
         self._stop_event.clear()
+        self._current_color = (r, g, b)
         self._animation_thread = threading.Thread(
             target=self._flash_loop, args=(r, g, b, count, on_time, off_time), daemon=True
         )
@@ -100,13 +101,20 @@ class BlinkStickController:
                 scale = i / 255.0
                 self._set_hw_color(int(r * scale), int(g * scale), int(b * scale))
                 time.sleep(speed)
-        self._set_hw_color(0, 0, 0)
+        # Stay on at full brightness after pulse completes
+        self._set_hw_color(r, g, b)
 
     def _flash_loop(self, r: int, g: int, b: int, count: int, on_time: float, off_time: float) -> None:
-        for _ in range(count):
+        for i in range(count):
             if self._stop_event.is_set():
                 return
             self._set_hw_color(r, g, b)
             time.sleep(on_time)
+            if self._stop_event.is_set():
+                return
             self._set_hw_color(0, 0, 0)
             time.sleep(off_time)
+        # Flash done — hold steady at the requested color
+        if not self._stop_event.is_set():
+            self._set_hw_color(r, g, b)
+            self._current_color = (r, g, b)

@@ -114,14 +114,18 @@ class App:
     def _start_pomodoro(self) -> None:
         self.pomodoro.on_phase_change = self._on_pomodoro_phase
         self.pomodoro.start()
-        self._update_pomodoro_visuals()
+        # Initial start: set steady color (no flash)
+        phase = self.pomodoro.phase
+        if phase == PomodoroPhase.WORK:
+            self.backlight.set_state("work")
+        else:
+            self.backlight.set_state("break")
+        r, g, b = self.backlight.current_color
+        self.blinkstick.set_color(r, g, b)
         self._bind_timer_buttons(pause_resume=True, stop_fn=self._stop_and_menu)
 
     def _on_pomodoro_phase(self, phase: PomodoroPhase, cycle: int) -> None:
         self._update_pomodoro_visuals()
-        # Flash BlinkStick on phase transition
-        r, g, b = self.backlight.current_color
-        self.blinkstick.flash(r, g, b, count=3)
 
     def _update_pomodoro_visuals(self) -> None:
         phase = self.pomodoro.phase
@@ -130,7 +134,8 @@ class App:
         else:
             self.backlight.set_state("break")
         r, g, b = self.backlight.current_color
-        self.blinkstick.set_color(r, g, b)
+        # Flash to signal transition, then hold steady
+        self.blinkstick.flash(r, g, b, count=3)
 
     # ── Countdown ──
 
@@ -226,13 +231,17 @@ class App:
         self.custom.on_phase_change = self._on_custom_phase
         self.custom.on_all_done = self._on_custom_all_done
         self.custom.start()
-        self._update_custom_visuals()
+        # Initial start: set steady color (no flash)
+        if self.custom.phase == CustomPhase.WORK:
+            self.backlight.set_state("work")
+        else:
+            self.backlight.set_state("break")
+        r, g, b = self.backlight.current_color
+        self.blinkstick.set_color(r, g, b)
         self._bind_timer_buttons(pause_resume=True, stop_fn=self._stop_and_menu)
 
     def _on_custom_phase(self, phase: CustomPhase, cycle: int, total: int) -> None:
         self._update_custom_visuals()
-        r, g, b = self.backlight.current_color
-        self.blinkstick.flash(r, g, b, count=3)
 
     def _update_custom_visuals(self) -> None:
         if self.custom.phase == CustomPhase.WORK:
@@ -240,7 +249,7 @@ class App:
         else:
             self.backlight.set_state("break")
         r, g, b = self.backlight.current_color
-        self.blinkstick.set_color(r, g, b)
+        self.blinkstick.flash(r, g, b, count=3)
 
     def _on_custom_all_done(self) -> None:
         self.backlight.set_state("done")
