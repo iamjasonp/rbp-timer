@@ -13,7 +13,7 @@ from rbp_timer.modes.countdown import CountdownMode
 from rbp_timer.modes.custom import CustomMode, CustomPhase
 from rbp_timer.hardware.display import Display
 from rbp_timer.hardware.backlight import Backlight
-from rbp_timer.hardware.buttons import Buttons, UP, DOWN, BACK, SELECT
+from rbp_timer.hardware.buttons import Buttons, UP, DOWN, BACK, MINUS, SELECT, PLUS
 from rbp_timer.hardware.blinkstick_ctrl import BlinkStickController
 from rbp_timer.ui.menu import Menu, MenuState
 from rbp_timer.ui import screens
@@ -85,6 +85,7 @@ class App:
         self.timer.stop()
         self.backlight.set_state("menu")
         self.blinkstick.off()
+        self.menu._state = MenuState.MAIN
         self._draw_menu()
         self._bind_menu_buttons()
 
@@ -164,6 +165,8 @@ class App:
         r, g, b = self.backlight.current_color
         self.blinkstick.set_color(r, g, b)
         self._bind_timer_buttons()
+        self.buttons.register(PLUS, lambda: self.timer.adjust_remaining(60))
+        self.buttons.register(MINUS, lambda: self.timer.adjust_remaining(-60))
 
     def _on_countdown_done(self) -> None:
         self.backlight.set_state("done")
