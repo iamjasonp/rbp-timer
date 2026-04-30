@@ -7,18 +7,22 @@ A headless productivity timer for Raspberry Pi 4 with **Pimoroni GFX HAT** and *
 - **Pomodoro** — 25 min work / 5 min short break / 15 min long break (every 4 cycles), auto-advancing
 - **Custom Pomodoro** — set your own work/break durations and cycle count (persisted across reboots)
 - **Countdown Timer** — configurable one-shot countdown (1–180 minutes) with live +/− minute adjustment
+- **Status Light** — count-up availability timer with Available/Away/Busy states and session summary
 - **Progress bar** — 5-pixel bar across bottom of LCD tracks elapsed time in Pomodoro modes
 - **Button LEDs** — only active buttons are illuminated; unmapped buttons stay dark
 
 ### Hardware Feedback
 
-| State   | GFX HAT Backlight      | BlinkStick               |
-|---------|------------------------|--------------------------|
-| Work    | Red (50%)              | Steady red (25%)         |
-| Break   | Blue (50%)             | Steady deep blue (25%)   |
-| Paused  | Amber (50%)            | Steady amber (25%)       |
-| Done    | Green (50%)            | Flash green (25%)        |
-| Menu    | Gray (full)            | Off                      |
+| State     | GFX HAT Backlight      | BlinkStick               |
+|-----------|------------------------|--------------------------|
+| Work      | Red (50%)              | Steady red (25%)         |
+| Break     | Blue (50%)             | Steady deep blue (25%)   |
+| Paused    | Amber (50%)            | Steady amber (25%)       |
+| Done      | Green (50%)            | Flash green (25%)        |
+| Available | Green (50%)            | Steady green (25%)       |
+| Away      | Amber (50%)            | Steady amber (25%)       |
+| Busy      | Red (50%)              | Steady red (25%)         |
+| Menu      | Gray (full)            | Off                      |
 
 Backlight and BlinkStick use independent color palettes (`BACKLIGHT_COLORS` and `BLINKSTICK_COLORS`) and can be tuned separately.
 
@@ -90,14 +94,14 @@ journalctl -u rbp-timer -f         # View logs
 
 Buttons are labeled left to right on the GFX HAT. LEDs light up only for active buttons.
 
-| Button      | Menu Screen      | Pomodoro Timer   | Countdown Timer  | Settings Screen  |
-|-------------|------------------|------------------|------------------|------------------|
-| ↑ Up (0)    | Navigate up      | —                | —                | +value           |
-| ↓ Down (1)  | Navigate down    | —                | —                | −value           |
-| ← Back (2)  | —                | Stop & menu      | Stop & menu      | Cancel           |
-| − Minus (3) | —                | —                | −1 minute        | —                |
-| ○ Select (4)| Select / enter   | Pause / Resume   | Pause / Resume   | Confirm / Next   |
-| + Plus (5)  | —                | Skip phase       | +1 minute        | —                |
+| Button      | Menu Screen      | Pomodoro Timer   | Countdown Timer  | Status Light     | Settings Screen  |
+|-------------|------------------|------------------|------------------|------------------|------------------|
+| ↑ Up (0)    | Navigate up      | —                | —                | —                | +value           |
+| ↓ Down (1)  | Navigate down    | —                | —                | —                | −value           |
+| ← Back (2)  | —                | Stop & menu      | Stop & menu      | Summary / Exit   | Cancel           |
+| − Minus (3) | —                | —                | −1 minute        | Away             | —                |
+| ○ Select (4)| Select / enter   | Pause / Resume   | Pause / Resume   | Available        | Confirm / Next   |
+| + Plus (5)  | —                | Skip phase       | +1 minute        | Busy             | —                |
 
 ## Configuration
 

@@ -7,11 +7,12 @@ Build a headless productivity timer for a Raspberry Pi 4 equipped with a **Pimor
 1. **Pomodoro** — 25 min work / 5 min short break / 15 min long break (every 4 cycles)
 2. **Custom Pomodoro** — user-defined work/break durations with configurable cycle count
 3. **Countdown Timer** — user-configurable one-shot countdown timer
+4. **Status Light** — count-up availability timer with three states (Available/Away/Busy)
 
 ## Hardware Mapping
 
 ### GFX HAT LCD (128×64 monochrome)
-- Main menu: mode selection (Pomodoro / Custom Pomodoro / Countdown Timer)
+- Main menu: mode selection (Pomodoro / Custom Pomodoro / Countdown Timer / Status Light)
 - Timer screen: large countdown digits, mode label, cycle count, progress bar (Pomodoro modes)
 - Settings screens: adjust durations with up/down buttons
 
@@ -24,20 +25,23 @@ Brightness is set to 50% of full values during timer states; menu brightness is 
 | Break       | Blue   |
 | Paused      | Amber  |
 | Timer done  | Green  |
+| Available   | Green  |
+| Away        | Amber  |
+| Busy        | Red    |
 | Menu/idle   | Gray   |
 
 ### GFX HAT Buttons (6 capacitive touch pads, left to right)
 Button LEDs automatically reflect mapping: lit when a handler is registered, dark when unmapped.
 Button handlers are dispatched in separate threads to prevent blocking the I2C poll loop.
 
-| Button   | Index | Menu Context     | Timer Context (Pomodoro) | Timer Context (Countdown) |
-|----------|-------|-----------------|--------------------------|---------------------------|
-| Up ↑     | 0     | Navigate up      | —                        | —                         |
-| Down ↓   | 1     | Navigate down    | —                        | —                         |
-| Back ←   | 2     | —                | Stop & menu              | Stop & menu               |
-| Minus −  | 3     | —                | —                        | −1 minute                 |
-| Select ○ | 4     | Select / enter   | Pause / Resume           | Pause / Resume            |
-| Plus +   | 5     | —                | Skip phase               | +1 minute                 |
+| Button   | Index | Menu Context     | Timer Context (Pomodoro) | Timer Context (Countdown) | Status Light              |
+|----------|-------|-----------------|--------------------------|---------------------------|---------------------------|
+| Up ↑     | 0     | Navigate up      | —                        | —                         | —                         |
+| Down ↓   | 1     | Navigate down    | —                        | —                         | —                         |
+| Back ←   | 2     | —                | Stop & menu              | Stop & menu               | Summary / Exit            |
+| Minus −  | 3     | —                | —                        | −1 minute                 | Away                      |
+| Select ○ | 4     | Select / enter   | Pause / Resume           | Pause / Resume            | Available                 |
+| Plus +   | 5     | —                | Skip phase               | +1 minute                 | Busy                      |
 
 ### BlinkStick Square
 - Uses independent color palette (`BLINKSTICK_COLORS`) — can be tuned separately from backlight
@@ -61,7 +65,8 @@ rbp-timer/
 │       │   ├── __init__.py
 │       │   ├── pomodoro.py   # Pomodoro mode config & state machine
 │       │   ├── countdown.py  # Simple countdown mode
-│       │   └── custom.py     # Custom intervals mode
+│       │   ├── custom.py     # Custom intervals mode
+│       │   └── status_light.py # Status Light count-up availability timer
 │       ├── hardware/
 │       │   ├── __init__.py
 │       │   ├── display.py    # GFX HAT LCD rendering (text, digits, menus)

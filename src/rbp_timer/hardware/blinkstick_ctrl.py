@@ -18,6 +18,9 @@ BLINKSTICK_COLORS = {
     "break": (0, 0, 128),
     "paused": (128, 100, 0),
     "done": (0, 128, 0),
+    "available": (0, 128, 0),
+    "away": (128, 100, 0),
+    "busy": (128, 0, 0),
 }
 
 
