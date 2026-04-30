@@ -55,8 +55,11 @@ class Display:
         x = (WIDTH - text_width) // 2
         self._draw.text((x, y), text, fill=1, font=font)
 
-    def draw_timer(self, remaining_seconds: float, label: str = "", sub_label: str = "") -> None:
-        """Draw the main timer display with large countdown digits."""
+    def draw_timer(self, remaining_seconds: float, label: str = "", sub_label: str = "", progress: float | None = None) -> None:
+        """Draw the main timer display with large countdown digits.
+        
+        progress: 0.0 to 1.0 fraction of elapsed time (None = no bar).
+        """
         self.clear()
         minutes = int(remaining_seconds) // 60
         seconds = int(remaining_seconds) % 60
@@ -65,7 +68,12 @@ class Display:
         self.draw_centered_text(2, label, "small")
         self.draw_centered_text(16, time_str, "large")
         if sub_label:
-            self.draw_centered_text(50, sub_label, "small")
+            self.draw_centered_text(46, sub_label, "small")
+
+        if progress is not None:
+            bar_width = int(WIDTH * max(0.0, min(1.0, progress)))
+            if bar_width > 0:
+                self._draw.rectangle((0, HEIGHT - 5, bar_width - 1, HEIGHT - 1), fill=1)
 
         self.show()
 

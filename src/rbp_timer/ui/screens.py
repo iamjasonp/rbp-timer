@@ -12,7 +12,7 @@ def render_main_menu(display: Display, items: list[str], selected: int) -> None:
     display.draw_menu("Jasondoro Timer", items, selected)
 
 
-def render_pomodoro(display: Display, remaining: float, phase: PomodoroPhase, cycle: int) -> None:
+def render_pomodoro(display: Display, remaining: float, phase: PomodoroPhase, cycle: int, duration: float = 0) -> None:
     phase_labels = {
         PomodoroPhase.WORK: "WORK",
         PomodoroPhase.SHORT_BREAK: "SHORT BREAK",
@@ -20,7 +20,8 @@ def render_pomodoro(display: Display, remaining: float, phase: PomodoroPhase, cy
     }
     label = phase_labels.get(phase, "")
     sub = f"Cycle {cycle + 1}"
-    display.draw_timer(remaining, label=label, sub_label=sub)
+    progress = (duration - remaining) / duration if duration > 0 else None
+    display.draw_timer(remaining, label=label, sub_label=sub, progress=progress)
 
 
 def render_countdown(display: Display, remaining: float, timer_state: TimerState) -> None:
@@ -32,10 +33,11 @@ def render_countdown(display: Display, remaining: float, timer_state: TimerState
     display.draw_timer(remaining, label="COUNTDOWN", sub_label=state_label)
 
 
-def render_custom(display: Display, remaining: float, phase: CustomPhase, cycle: int, total: int) -> None:
+def render_custom(display: Display, remaining: float, phase: CustomPhase, cycle: int, total: int, duration: float = 0) -> None:
     phase_label = "WORK" if phase == CustomPhase.WORK else "BREAK"
     sub = f"Cycle {cycle + 1}/{total}"
-    display.draw_timer(remaining, label=phase_label, sub_label=sub)
+    progress = (duration - remaining) / duration if duration > 0 else None
+    display.draw_timer(remaining, label=phase_label, sub_label=sub, progress=progress)
 
 
 def render_countdown_settings(display: Display, minutes: int) -> None:
