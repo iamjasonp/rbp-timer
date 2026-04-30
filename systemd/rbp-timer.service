@@ -4,7 +4,7 @@ After=multi-user.target
 
 [Service]
 Type=simple
-ExecStart=/opt/rbp-timer/.venv/bin/python -m rbp_timer.main
+ExecStart=/opt/rbp-timer/.venv/bin/python -u -m rbp_timer.main
 WorkingDirectory=/opt/rbp-timer
 Restart=on-failure
 RestartSec=5
