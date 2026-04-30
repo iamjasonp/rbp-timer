@@ -12,7 +12,7 @@ except ImportError:
 
 # State-to-color mapping (R, G, B)
 # Timer states are at 50% brightness; menu is full brightness
-COLORS = {
+BACKLIGHT_COLORS = {
     "work": (128, 0, 0),
     "break": (0, 50, 128),
     "paused": (128, 100, 0),
@@ -29,7 +29,7 @@ class Backlight:
 
     def set_state(self, state: str) -> None:
         """Set backlight color based on a named state."""
-        color = COLORS.get(state, COLORS["menu"])
+        color = BACKLIGHT_COLORS.get(state, BACKLIGHT_COLORS["menu"])
         self.set_color(*color)
 
     def set_color(self, r: int, g: int, b: int) -> None:

@@ -40,7 +40,8 @@ Button handlers are dispatched in separate threads to prevent blocking the I2C p
 | Plus +   | 5     | —                | Skip phase               | +1 minute                 |
 
 ### BlinkStick Square
-- Steady color mirrors backlight state during active timer
+- Uses independent color palette (`BLINKSTICK_COLORS`) — can be tuned separately from backlight
+- Deep blue `(0, 0, 128)` for break state (backlight uses lighter blue)
 - Brightness capped at 25% via hardware scalar in BlinkStickController
 - Pulse/flash animation on timer completion and phase transitions
 - Off when idle/in menu

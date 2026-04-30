@@ -14,7 +14,7 @@ from rbp_timer.modes.custom import CustomMode, CustomPhase
 from rbp_timer.hardware.display import Display
 from rbp_timer.hardware.backlight import Backlight
 from rbp_timer.hardware.buttons import Buttons, UP, DOWN, BACK, MINUS, SELECT, PLUS
-from rbp_timer.hardware.blinkstick_ctrl import BlinkStickController
+from rbp_timer.hardware.blinkstick_ctrl import BlinkStickController, BLINKSTICK_COLORS
 from rbp_timer.ui.menu import Menu, MenuState
 from rbp_timer.ui import screens
 
@@ -120,7 +120,7 @@ class App:
             self.backlight.set_state("work")
         else:
             self.backlight.set_state("break")
-        r, g, b = self.backlight.current_color
+        r, g, b = BLINKSTICK_COLORS.get("work" if phase == PomodoroPhase.WORK else "break", (0, 0, 128))
         self.blinkstick.set_color(r, g, b)
         self._bind_timer_buttons()
         self.buttons.register(PLUS, self._skip_pomodoro_phase)
@@ -140,7 +140,7 @@ class App:
             self.backlight.set_state("work")
         else:
             self.backlight.set_state("break")
-        r, g, b = self.backlight.current_color
+        r, g, b = BLINKSTICK_COLORS.get("work" if phase == PomodoroPhase.WORK else "break", (0, 0, 128))
         # Flash to signal transition, then hold steady
         self.blinkstick.flash(r, g, b, count=3)
 
@@ -169,7 +169,7 @@ class App:
     def _start_countdown(self) -> None:
         self.countdown.start()
         self.backlight.set_state("work")
-        r, g, b = self.backlight.current_color
+        r, g, b = BLINKSTICK_COLORS["work"]
         self.blinkstick.set_color(r, g, b)
         self._bind_timer_buttons()
         self.buttons.register(PLUS, lambda: self.timer.adjust_remaining(60))
@@ -243,7 +243,7 @@ class App:
             self.backlight.set_state("work")
         else:
             self.backlight.set_state("break")
-        r, g, b = self.backlight.current_color
+        r, g, b = BLINKSTICK_COLORS.get("work" if self.custom.phase == CustomPhase.WORK else "break", (0, 0, 128))
         self.blinkstick.set_color(r, g, b)
         self._bind_timer_buttons()
         self.buttons.register(PLUS, self._skip_custom_phase)
@@ -265,7 +265,7 @@ class App:
             self.backlight.set_state("work")
         else:
             self.backlight.set_state("break")
-        r, g, b = self.backlight.current_color
+        r, g, b = BLINKSTICK_COLORS.get("work" if self.custom.phase == CustomPhase.WORK else "break", (0, 0, 128))
         self.blinkstick.flash(r, g, b, count=3)
 
     def _on_custom_all_done(self) -> None:
@@ -287,7 +287,7 @@ class App:
         if self.timer.state == TimerState.RUNNING:
             self.timer.pause()
             self.backlight.set_state("paused")
-            self.blinkstick.set_color(128, 100, 0)
+            self.blinkstick.set_color(*BLINKSTICK_COLORS["paused"])
         elif self.timer.state == TimerState.PAUSED:
             self.timer.resume()
             # Restore mode-appropriate color
@@ -295,8 +295,7 @@ class App:
                 self._update_pomodoro_visuals()
             elif self._active_mode == "countdown":
                 self.backlight.set_state("work")
-                r, g, b = self.backlight.current_color
-                self.blinkstick.set_color(r, g, b)
+                self.blinkstick.set_color(*BLINKSTICK_COLORS["work"])
             elif self._active_mode == "custom":
                 self._update_custom_visuals()
 

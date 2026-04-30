@@ -12,6 +12,15 @@ except ImportError:
     blinkstick = None
 
 
+# BlinkStick-specific color overrides (deeper blue looks better on LEDs)
+BLINKSTICK_COLORS = {
+    "work": (128, 0, 0),
+    "break": (0, 0, 128),
+    "paused": (128, 100, 0),
+    "done": (0, 128, 0),
+}
+
+
 class BlinkStickController:
     """Controls a BlinkStick USB LED with steady colors and animations."""
 
