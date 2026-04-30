@@ -13,7 +13,7 @@ from rbp_timer.modes.countdown import CountdownMode
 from rbp_timer.modes.custom import CustomMode, CustomPhase
 from rbp_timer.hardware.display import Display
 from rbp_timer.hardware.backlight import Backlight
-from rbp_timer.hardware.buttons import Buttons, UP, DOWN, BACK, MINUS, SELECT, PLUS
+from rbp_timer.hardware.buttons import Buttons, UP, DOWN, BACK, SELECT
 from rbp_timer.hardware.blinkstick_ctrl import BlinkStickController
 from rbp_timer.ui.menu import Menu, MenuState
 from rbp_timer.ui import screens
@@ -96,7 +96,6 @@ class App:
         self.buttons.register(UP, self.menu.navigate_up)
         self.buttons.register(DOWN, self.menu.navigate_down)
         self.buttons.register(SELECT, self.menu.select)
-        self.buttons.register(PLUS, self.menu.select)
 
     # ── Mode Selection ──
 
@@ -122,7 +121,7 @@ class App:
             self.backlight.set_state("break")
         r, g, b = self.backlight.current_color
         self.blinkstick.set_color(r, g, b)
-        self._bind_timer_buttons(pause_resume=True, stop_fn=self._stop_and_menu)
+        self._bind_timer_buttons()
 
     def _on_pomodoro_phase(self, phase: PomodoroPhase, cycle: int) -> None:
         self._update_pomodoro_visuals()
@@ -157,7 +156,6 @@ class App:
         self.buttons.register(UP, up)
         self.buttons.register(DOWN, down)
         self.buttons.register(SELECT, confirm)
-        self.buttons.register(PLUS, confirm)
         self.buttons.register(BACK, lambda: self.menu.back())
 
     def _start_countdown(self) -> None:
@@ -165,11 +163,11 @@ class App:
         self.backlight.set_state("work")
         r, g, b = self.backlight.current_color
         self.blinkstick.set_color(r, g, b)
-        self._bind_timer_buttons(pause_resume=True, stop_fn=self._stop_and_menu)
+        self._bind_timer_buttons()
 
     def _on_countdown_done(self) -> None:
         self.backlight.set_state("done")
-        self.blinkstick.flash(128, 0, 0, count=5)
+        self.blinkstick.flash(0, 128, 0, count=5)
         self.display.draw_message("Time's Up!", "Press any button")
         self.buttons.clear_handlers()
         for btn in range(6):
@@ -224,7 +222,6 @@ class App:
         self.buttons.register(UP, up)
         self.buttons.register(DOWN, down)
         self.buttons.register(SELECT, next_field)
-        self.buttons.register(PLUS, next_field)
         self.buttons.register(BACK, lambda: self.menu.back())
 
     def _start_custom(self) -> None:
@@ -238,7 +235,7 @@ class App:
             self.backlight.set_state("break")
         r, g, b = self.backlight.current_color
         self.blinkstick.set_color(r, g, b)
-        self._bind_timer_buttons(pause_resume=True, stop_fn=self._stop_and_menu)
+        self._bind_timer_buttons()
 
     def _on_custom_phase(self, phase: CustomPhase, cycle: int, total: int) -> None:
         self._update_custom_visuals()
@@ -253,7 +250,7 @@ class App:
 
     def _on_custom_all_done(self) -> None:
         self.backlight.set_state("done")
-        self.blinkstick.flash(128, 0, 0, count=5)
+        self.blinkstick.flash(0, 128, 0, count=5)
         self.display.draw_message("All Done!", f"{self.custom.total_cycles} cycles complete")
         self.buttons.clear_handlers()
         for btn in range(6):
@@ -261,12 +258,9 @@ class App:
 
     # ── Common Timer Controls ──
 
-    def _bind_timer_buttons(self, pause_resume: bool = True, stop_fn=None) -> None:
+    def _bind_timer_buttons(self) -> None:
         self.buttons.clear_handlers()
-        if pause_resume:
-            self.buttons.register(SELECT, self._toggle_pause)
-        if stop_fn:
-            self.buttons.register(PLUS, stop_fn)
+        self.buttons.register(SELECT, self._toggle_pause)
         self.buttons.register(BACK, self._stop_and_menu)
 
     def _toggle_pause(self) -> None:
