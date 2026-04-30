@@ -13,7 +13,7 @@ from rbp_timer.modes.countdown import CountdownMode
 from rbp_timer.modes.custom import CustomMode, CustomPhase
 from rbp_timer.hardware.display import Display
 from rbp_timer.hardware.backlight import Backlight
-from rbp_timer.hardware.buttons import Buttons, UP, DOWN, LEFT, RIGHT, A, B
+from rbp_timer.hardware.buttons import Buttons, UP, DOWN, BACK, MINUS, SELECT, PLUS
 from rbp_timer.hardware.blinkstick_ctrl import BlinkStickController
 from rbp_timer.ui.menu import Menu, MenuState
 from rbp_timer.ui import screens
@@ -95,8 +95,8 @@ class App:
         self.buttons.clear_handlers()
         self.buttons.register(UP, self.menu.navigate_up)
         self.buttons.register(DOWN, self.menu.navigate_down)
-        self.buttons.register(RIGHT, self.menu.select)
-        self.buttons.register(A, self.menu.select)
+        self.buttons.register(SELECT, self.menu.select)
+        self.buttons.register(PLUS, self.menu.select)
 
     # ── Mode Selection ──
 
@@ -156,9 +156,9 @@ class App:
 
         self.buttons.register(UP, up)
         self.buttons.register(DOWN, down)
-        self.buttons.register(RIGHT, confirm)
-        self.buttons.register(A, confirm)
-        self.buttons.register(LEFT, lambda: self.menu.back())
+        self.buttons.register(SELECT, confirm)
+        self.buttons.register(PLUS, confirm)
+        self.buttons.register(BACK, lambda: self.menu.back())
 
     def _start_countdown(self) -> None:
         self.countdown.start()
@@ -223,9 +223,9 @@ class App:
 
         self.buttons.register(UP, up)
         self.buttons.register(DOWN, down)
-        self.buttons.register(RIGHT, next_field)
-        self.buttons.register(A, next_field)
-        self.buttons.register(LEFT, lambda: self.menu.back())
+        self.buttons.register(SELECT, next_field)
+        self.buttons.register(PLUS, next_field)
+        self.buttons.register(BACK, lambda: self.menu.back())
 
     def _start_custom(self) -> None:
         self.custom.on_phase_change = self._on_custom_phase
@@ -264,10 +264,10 @@ class App:
     def _bind_timer_buttons(self, pause_resume: bool = True, stop_fn=None) -> None:
         self.buttons.clear_handlers()
         if pause_resume:
-            self.buttons.register(A, self._toggle_pause)
+            self.buttons.register(SELECT, self._toggle_pause)
         if stop_fn:
-            self.buttons.register(B, stop_fn)
-        self.buttons.register(LEFT, self._stop_and_menu)
+            self.buttons.register(PLUS, stop_fn)
+        self.buttons.register(BACK, self._stop_and_menu)
 
     def _toggle_pause(self) -> None:
         if self.timer.state == TimerState.RUNNING:
