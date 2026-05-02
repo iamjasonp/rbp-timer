@@ -125,13 +125,15 @@ class Buttons:
                 time.sleep(_POLL_INTERVAL)
                 continue
 
-            # Always clear the INT flag so the sensor keeps updating.
-            # The status register latches and freezes while INT is set.
+            # CAP1166 INT flag (bit 0 of MAIN_CONTROL register 0x00):
+            # The sensor input status register (0x03) latches and freezes
+            # while the INT flag is set. Clear it by writing bit 0 = 0 so
+            # the sensor continues reporting new touch events.
             try:
                 main = _bus.read_byte_data(_CAP1166_ADDR, _REG_MAIN_CONTROL)
-                if main & 0x01:
+                if main & 0x01:  # INT flag is set
                     _bus.write_byte_data(
-                        _CAP1166_ADDR, _REG_MAIN_CONTROL, main & ~0x01
+                        _CAP1166_ADDR, _REG_MAIN_CONTROL, main & ~0x01  # clear INT flag
                     )
             except OSError:
                 pass

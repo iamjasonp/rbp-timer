@@ -88,12 +88,15 @@ class Timer:
 
     def pause(self) -> None:
         """Pause a running timer."""
+        thread = None
+        was_running = False
         with self._lock:
             if self._state == TimerState.RUNNING:
                 self._stop_event.set()
                 thread = self._thread
+                was_running = True
         # Join outside lock to avoid deadlock
-        if self._state != TimerState.PAUSED and thread:
+        if was_running and thread:
             thread.join(timeout=2.0)
         with self._lock:
             if self._state == TimerState.RUNNING:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import threading
 from typing import List, Optional, Tuple
 
 try:
@@ -16,11 +17,17 @@ HEIGHT = 64
 
 
 class Display:
-    """Renders text and graphics to the GFX HAT 128×64 monochrome LCD."""
+    """Renders text and graphics to the GFX HAT 128×64 monochrome LCD.
+
+    Thread-safe: a lock protects the shared image buffer and LCD output
+    so that concurrent callers (tick threads, button handlers) cannot
+    corrupt a frame mid-render.
+    """
 
     def __init__(self):
         self._image = Image.new("1", (WIDTH, HEIGHT), 0)
         self._draw = ImageDraw.Draw(self._image)
+        self._lock = threading.Lock()
         try:
             self._font_large = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 28)
             self._font_medium = ImageFont.truetype("/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf", 14)
@@ -60,53 +67,80 @@ class Display:
         
         progress: 0.0 to 1.0 fraction of elapsed time (None = no bar).
         """
-        self.clear()
-        minutes = int(remaining_seconds) // 60
-        seconds = int(remaining_seconds) % 60
-        time_str = f"{minutes:02d}:{seconds:02d}"
+        with self._lock:
+            self.clear()
+            minutes = int(remaining_seconds) // 60
+            seconds = int(remaining_seconds) % 60
+            time_str = f"{minutes:02d}:{seconds:02d}"
 
-        self.draw_centered_text(2, label, "small")
-        self.draw_centered_text(16, time_str, "large")
-        if sub_label:
-            self.draw_centered_text(46, sub_label, "small")
+            self.draw_centered_text(2, label, "small")
+            self.draw_centered_text(16, time_str, "large")
+            if sub_label:
+                self.draw_centered_text(46, sub_label, "small")
 
-        if progress is not None:
-            bar_width = int(WIDTH * max(0.0, min(1.0, progress)))
-            if bar_width > 0:
-                self._draw.rectangle((0, HEIGHT - 5, bar_width - 1, HEIGHT - 1), fill=1)
+            if progress is not None:
+                bar_width = int(WIDTH * max(0.0, min(1.0, progress)))
+                if bar_width > 0:
+                    self._draw.rectangle((0, HEIGHT - 5, bar_width - 1, HEIGHT - 1), fill=1)
 
-        self.show()
+            self.show()
 
     def draw_menu(self, title: str, items: List[str], selected_index: int) -> None:
         """Draw a menu with a title and selectable items."""
-        self.clear()
-        self.draw_centered_text(0, title, "small")
-        self._draw.line((0, 12, WIDTH - 1, 12), fill=1)
+        with self._lock:
+            self.clear()
+            self.draw_centered_text(0, title, "small")
+            self._draw.line((0, 12, WIDTH - 1, 12), fill=1)
 
-        visible_start = max(0, selected_index - 2)
-        for i, item_idx in enumerate(range(visible_start, min(len(items), visible_start + 4))):
-            y = 16 + i * 12
-            prefix = "> " if item_idx == selected_index else "  "
-            self.draw_text(2, y, f"{prefix}{items[item_idx]}", "small")
+            visible_start = max(0, selected_index - 2)
+            for i, item_idx in enumerate(range(visible_start, min(len(items), visible_start + 4))):
+                y = 16 + i * 12
+                prefix = "> " if item_idx == selected_index else "  "
+                self.draw_text(2, y, f"{prefix}{items[item_idx]}", "small")
 
-        self.show()
+            self.show()
 
     def draw_setting(self, title: str, value: str, hint: str = "") -> None:
         """Draw a settings adjustment screen."""
-        self.clear()
-        self.draw_centered_text(2, title, "small")
-        self.draw_centered_text(20, value, "large")
-        if hint:
-            self.draw_centered_text(52, hint, "small")
-        self.show()
+        with self._lock:
+            self.clear()
+            self.draw_centered_text(2, title, "small")
+            self.draw_centered_text(20, value, "large")
+            if hint:
+                self.draw_centered_text(52, hint, "small")
+            self.show()
 
     def draw_message(self, line1: str, line2: str = "") -> None:
         """Draw a simple centered message."""
+        with self._lock:
+            self.clear()
+            self.draw_centered_text(16, line1, "medium")
+            if line2:
+                self.draw_centered_text(38, line2, "small")
+            self.show()
+
+    def begin_frame(self):
+        """Acquire the display lock and clear the buffer for atomic frame composition.
+        
+        Use as a context manager — show() is called automatically on exit:
+            with display.begin_frame():
+                display.draw_text(...)
+                display.draw_centered_text(...)
+        """
+        self._lock.acquire()
         self.clear()
-        self.draw_centered_text(16, line1, "medium")
-        if line2:
-            self.draw_centered_text(38, line2, "small")
+        return self
+
+    def end_frame(self):
+        """Flush the buffer to LCD and release the display lock."""
         self.show()
+        self._lock.release()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.end_frame()
 
     def show(self) -> None:
         """Flush the image buffer to the LCD hardware."""

@@ -72,21 +72,19 @@ def render_status_light(display: Display, state: StatusLightState, state_elapsed
     }
     label = state_labels.get(state, "")
     time_str = _format_elapsed(state_elapsed)
-    display.clear()
-    display.draw_centered_text(2, label, "small")
-    display.draw_centered_text(16, time_str, "large")
-    display.show()
+    with display.begin_frame():
+        display.draw_centered_text(2, label, "small")
+        display.draw_centered_text(16, time_str, "large")
 
 
 def render_status_summary(display: Display, summary: dict) -> None:
-    display.clear()
-    display.draw_centered_text(0, "TIMER PAUSED", "small")
     avail = _format_elapsed(summary.get("available", 0))
     away = _format_elapsed(summary.get("away", 0))
     busy = _format_elapsed(summary.get("busy", 0))
     total = _format_elapsed(summary.get("total", 0))
-    display.draw_text(2, 14, f"Avail: {avail}", "small")
-    display.draw_text(2, 26, f"Away:  {away}", "small")
-    display.draw_text(2, 38, f"Busy:  {busy}", "small")
-    display.draw_text(2, 50, f"Total: {total}", "small")
-    display.show()
+    with display.begin_frame():
+        display.draw_centered_text(0, "TIMER PAUSED", "small")
+        display.draw_text(2, 14, f"Avail: {avail}", "small")
+        display.draw_text(2, 26, f"Away:  {away}", "small")
+        display.draw_text(2, 38, f"Busy:  {busy}", "small")
+        display.draw_text(2, 50, f"Total: {total}", "small")
